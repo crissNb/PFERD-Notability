@@ -172,9 +172,11 @@ class Pferd:
             for path in sorted(crawler.report.added_files):
                 something_changed = True
                 log.report(f"  [bold bright_green]Added[/] {fmt_path(path)}")
+                self.start_converter(path, False)
             for path in sorted(crawler.report.changed_files):
                 something_changed = True
                 log.report(f"  [bold bright_yellow]Changed[/] {fmt_path(path)}")
+                self.start_converter(path, True)
             for path in sorted(crawler.report.deleted_files):
                 something_changed = True
                 log.report(f"  [bold bright_magenta]Deleted[/] {fmt_path(path)}")
@@ -192,3 +194,6 @@ class Pferd:
 
             if not something_changed:
                 log.report("  Nothing changed")
+
+    def start_converter(self, path, changed) -> None:
+        print("qqq")
