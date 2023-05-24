@@ -1,5 +1,8 @@
+import socket
+
 from pathlib import Path
 from typing import Dict, List, Optional
+
 
 from rich.markup import escape
 
@@ -168,15 +171,16 @@ class Pferd:
             log.report("")
             log.report(f"[bold bright_cyan]Report[/] for {escape(name)}")
 
+            encoded_data = ""
+
             something_changed = False
             for path in sorted(crawler.report.added_files):
                 something_changed = True
                 log.report(f"  [bold bright_green]Added[/] {fmt_path(path)}")
-                self.start_converter(path, False)
+                encoded_data += str(path) + ":::" + str(False) + ";;;"
             for path in sorted(crawler.report.changed_files):
                 something_changed = True
                 log.report(f"  [bold bright_yellow]Changed[/] {fmt_path(path)}")
-                self.start_converter(path, True)
             for path in sorted(crawler.report.deleted_files):
                 something_changed = True
                 log.report(f"  [bold bright_magenta]Deleted[/] {fmt_path(path)}")
@@ -195,5 +199,19 @@ class Pferd:
             if not something_changed:
                 log.report("  Nothing changed")
 
-    def start_converter(self, path, changed) -> None:
-        print("qqq")
+            self.start_converter(encoded_data)
+
+    def start_converter(self, encoded_data) -> None:
+        if encoded_data == "":
+            log.report("  No data to convert")
+            return
+
+        log.report("  Starting converter")
+
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect(('localhost', 8000))
+
+        client_socket.send(encoded_data.encode('utf-8'))
+
+        data = client_socket.recv(1024).decode('utf-8')
+        log.report("  Converter finished " + data)
